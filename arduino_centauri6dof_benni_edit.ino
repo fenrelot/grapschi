@@ -12,83 +12,50 @@
 
 
 // Joint 1 Rotation gesamter arm (2.0A)
-//#define E1_STEP_PIN        36
-//#define E1_DIR_PIN         34
+#define E1_STEP_PIN        36
+#define E1_DIR_PIN         34
 #define E1_ENABLE_PIN      30
 
-#define JOINT1_STEP_PIN        36 //48 //CLK+
-#define JOINT1_DIR_PIN         34 //46 //CW+
-
 // Joint 2 NEMA23 stepper 2x (auf cnc shield ueber aux2) (2x 1.5A)
-//#define AUX_STEP_PIN         63
-//#define AUX_DIR_PIN          40
+#define AUX_STEP_PIN         63
+#define AUX_DIR_PIN          40
 #define AUX_ENABLE_PIN       42
-
-
-#define JOINT2_STEP_PIN_M1     63 //44 //CLK+
-#define JOINT2_DIR_PIN_M1      40 //42 //CW+
 
 #define JOINT2_STEP_PIN_M2     18 //CLK+
 #define JOINT2_DIR_PIN_M2      19 //CW+
 
-
-//// Joint 6 !!! NEMA 14 (0.8A)
-//#define Z_STEP_PIN         46
-//#define Z_DIR_PIN          48
-#define Z_ENABLE_PIN       62
-//#define Z_MIN_PIN          18
-//#define Z_MAX_PIN          19
-
-#define JOINT6_STEP_PIN        46 //24 //CLK+
-#define JOINT6_DIR_PIN         48 //22 //CW+
-
 // Joint 3 NEMA17 mit untersetzung 1:5 (2.1A)
-//#define Y_STEP_PIN         60
-//#define Y_DIR_PIN          61
+#define Y_STEP_PIN         60
+#define Y_DIR_PIN          61
 #define Y_ENABLE_PIN       56
 //#define Y_MIN_PIN          14
 //#define Y_MAX_PIN          15
 
-#define JOINT3_STEP_PIN        60 //36 //CLK+
-#define JOINT3_DIR_PIN         61 //34 //CW+
-
-
 // Joint 4 NENA 17 (2.0A)
-//#define X_STEP_PIN         54
-//#define X_DIR_PIN          55
+#define X_STEP_PIN         54
+#define X_DIR_PIN          55
 #define X_ENABLE_PIN       38
 
-#define JOINT4_STEP_PIN        54 //32 //CLK+
-#define JOINT4_DIR_PIN         55 //30 //CW+
-
 // Joint 5 NEMA 14 (0.8A)
-//#define E0_STEP_PIN        26
-//#define E0_DIR_PIN         28
+#define E0_STEP_PIN        26
+#define E0_DIR_PIN         28
 #define E0_ENABLE_PIN      24
 
-#define JOINT5_STEP_PIN       26 // 28 //CLK+
-#define JOINT5_DIR_PIN        28//  26 //CW+
+//// Joint 6 !!! NEMA 14 (0.8A)
+#define Z_STEP_PIN         46
+#define Z_DIR_PIN          48
+#define Z_ENABLE_PIN       62
+//#define Z_MIN_PIN          18
+//#define Z_MAX_PIN          19
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-AccelStepper joint1   (1, JOINT1_STEP_PIN, JOINT1_DIR_PIN);
-AccelStepper joint2_m1(1, JOINT2_STEP_PIN_M1, JOINT2_DIR_PIN_M1);
+AccelStepper joint1   (1, E1_STEP_PIN, E1_DIR_PIN);
+AccelStepper joint2_m1(1, AUX_STEP_PIN, AUX_DIR_PIN);
 AccelStepper joint2_m2(1, JOINT2_STEP_PIN_M2, JOINT2_DIR_PIN_M2);
-AccelStepper joint3   (1, JOINT3_STEP_PIN, JOINT3_DIR_PIN);
-AccelStepper joint4   (1, JOINT4_STEP_PIN, JOINT4_DIR_PIN);
-AccelStepper joint5   (1, JOINT5_STEP_PIN, JOINT5_DIR_PIN);
-AccelStepper joint6   (1, JOINT6_STEP_PIN, JOINT6_DIR_PIN);
+AccelStepper joint3   (1, Y_STEP_PIN, Y_DIR_PIN);
+AccelStepper joint4   (1, X_STEP_PIN, X_DIR_PIN);
+AccelStepper joint5   (1, E0_STEP_PIN, E0_DIR_PIN);
+AccelStepper joint6   (1, Z_STEP_PIN, Z_DIR_PIN);
 
 Servo gripper; 
 int pos_gripper = 0;
@@ -103,7 +70,7 @@ int eff1 = 0;//Efector final abierto
 
 float Sensibility = 0.185;
 
-ros::NodeHandle nh; // Declaración del NodeHandle con la instancia nh
+ros::NodeHandle nh; // NodeHandle declaration with instance nh
 std_msgs::Int16 msg;
 std_msgs::Float64 test;
 
@@ -116,7 +83,7 @@ void arm_cb(const centauri6dof_moveit::ArmJointState& arm_steps){
   joint_step[3] = arm_steps.position4;
   joint_step[4] = arm_steps.position5;
   joint_step[5] = arm_steps.position6;
-  joint_step[6] = arm_steps.position7; //Posición del Gripper <0-89>
+  joint_step[6] = arm_steps.position7; //Gripper position <0-89>.
 }
 
 void gripper_cb( const std_msgs::UInt16& cmd_msg){
@@ -124,19 +91,19 @@ void gripper_cb( const std_msgs::UInt16& cmd_msg){
    
   if(cmd_msg.data > 0)
   {
-    for(pos = 0; pos < 90; pos += 1)   // Va de 0 a 89° En pasos de 1 grado
+    for(pos = 0; pos < 90; pos += 1)   // Ranges from 0 to 89° In 1-degree steps
     {                                   
-      gripper.write(pos);              // Indicarle al servo que adquiera la variable pos 
-      delay(5);                        // Esperar 5ms pra que el servo llegue a la posición 
+      gripper.write(pos);              // Tell the servo to acquire the variable pos. 
+      delay(5);                        // Wait 5ms for the servo to reach the position. 
     }
   }
   
   if(cmd_msg.data == 0)
   {
-    for(pos = 90; pos>=1; pos-=1)      // Va de 89 a 0° 
+    for(pos = 90; pos>=1; pos-=1)      // Ranges from 89 to 0°. 
     {                                
-      gripper.write(pos);              // Indicarle al servo que adquiera la variable pos
-      delay(5);                        // Esperar 5ms pra que el servo llegue a la posición
+      gripper.write(pos);              // Tell the servo to acquire the variable pos. 
+      delay(5);                        // Wait 5ms for the servo to reach the position. 
     }
   }
 }
@@ -152,11 +119,11 @@ float get_current(int n){
   return(current);
 }
 */
-/*------------------definición de los objetos subscriptores------------------*/
-//la función arm_cb se ejecuta cuando hay un mensaje en el topic joint_steps
+/*------------------definition of subscriber objects------------------*/
+//the function arm_cb is executed when there is a message in the topic joint_steps
 ros::Subscriber<centauri6dof_moveit::ArmJointState> arm_sub("joint_steps",arm_cb);
 
-//la función arm_cb se ejecuta cuando hay un mensaje en el topic gripper_angle
+//the function arm_cb is executed when there is a message in the topic gripper_angle
 ros::Subscriber<std_msgs::UInt16> gripper_sub("gripper_angle", gripper_cb); 
 
 /* //Current
@@ -164,7 +131,7 @@ ros::Publisher p("current", &test);
 */
 
 void setup() {
-  
+  //i dont know if it is neccesary to set all to output (it is not for the dir and step pins ??)
   pinMode(E1_ENABLE_PIN, OUTPUT);
   pinMode(X_ENABLE_PIN, OUTPUT);
   pinMode(Y_ENABLE_PIN, OUTPUT);
@@ -183,17 +150,18 @@ void setup() {
   //Serial.begin(57600);
   joint_status = 1;
 
-  // inicializacion del nodo para el uso de la comunicación por puerto serial
+  // node initialization for the use of serial port communication
   nh.initNode(); 
   
-  //Inicializar subscriptores
+  //Initialize subscribers
   nh.subscribe(arm_sub); 
   nh.subscribe(gripper_sub);
   /* //Current
   nh.advertise(p);
   */
 
-  //Asignación de valor de maxima velocidad para cada motor
+  //Assignment of maximum speed value for each motor
+  //EDIT: setAcceleration also! so the movement begins and ends more smoothly
   joint1.setMaxSpeed(1500);
   joint1.setAcceleration(100);
   
@@ -215,7 +183,7 @@ void setup() {
   joint6.setMaxSpeed(500);
   joint6.setAcceleration(100);
 
-  //Agregar motores a la libreria MultiStepper
+  //AAdd motors to the MultiStepper library
   steppers.addStepper(joint1);
   steppers.addStepper(joint2_m1);
   steppers.addStepper(joint2_m2);
@@ -224,8 +192,8 @@ void setup() {
   steppers.addStepper(joint5);
   steppers.addStepper(joint6);
 
-  //Asignar el puerto PWM 4 AL Gripper
-  gripper.attach(11); //original 4
+  //Assign PWM port 4 to AL Gripper
+  gripper.attach(11); //original 4 -> i changed it to 11 because 11 is very accessible on the RAMPS 1.4
 
 }
 
@@ -235,7 +203,7 @@ void loop() {
   test.data = I;
   p.publish( &test );
   */
-  if (joint_status == 1){ // Si arm_cb esta siendo llamado asigna el estado de joint_state a 1.
+  if (joint_status == 1){ // If arm_cb is being called it sets the joint_state to 1.
     
     long positions[7];
 
@@ -253,9 +221,9 @@ void loop() {
     
     if(joint_step[6] > 0){
       if(eff1 == 0){
-        for(pos = 0; pos < 90; pos += 1){  // Va de 0 a 89° En pasos de 1 grado                                   
-          gripper.write(pos);              // Indicarle al servo que adquiera la variable pos 
-          delay(5);                        // Esperar 5ms para que el servo llegue a la posición 
+        for(pos = 0; pos < 90; pos += 1){  // Ranges from 0 to 89° In steps of 1 degree                                   
+          gripper.write(pos);              // Instruct the servo to acquire the variable pos. 
+          delay(5);                        // Wait 5ms for the servo to reach the position. 
         }        
       }
       eff1++;
@@ -264,9 +232,9 @@ void loop() {
 
     if(joint_step[6] == 0){
       if(eff0 == 0){
-        for(pos = 90; pos>=1; pos-=1){     // Va de 89 a 0°                               
-          gripper.write(pos);              // Indicarle al servo que adquiera la variable pos
-          delay(5);                        // Esperar 5ms para que el servo llegue a la posición
+        for(pos = 90; pos>=1; pos-=1){     // Ranges from 89 to 0°.                               
+          gripper.write(pos);              // Instruct the servo to acquire the variable pos.
+          delay(5);                        // Wait 5ms for the servo to reach the position.
         }
       }
       eff0++;
